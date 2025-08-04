@@ -1,0 +1,9 @@
+.movieDiv {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+.movieInput {
+  padding: 5px;
+}

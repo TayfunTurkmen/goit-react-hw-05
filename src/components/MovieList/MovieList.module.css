@@ -1,0 +1,12 @@
+.navLink {
+  text-decoration: underline;
+}
+.movieUl {
+  padding-left: 35px;
+}
+.navLink:focus {
+  color: red;
+}
+.navLink:hover {
+  text-decoration: none;
+}

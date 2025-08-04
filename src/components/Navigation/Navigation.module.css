@@ -1,0 +1,12 @@
+.headerNav {
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  margin-bottom: 10px;
+}
+.navLink {
+  margin-right: 10px;
+  color: black;
+}
+.isActive {
+  color: crimson;
+}

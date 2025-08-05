@@ -1,43 +1,48 @@
-import { useEffect, useState } from "react";
-import { fetchCast } from "../../movie-api";
-import { useParams } from "react-router-dom";
-import style from "./MovieCast.module.css";
-const MovieCast = () => {
-  const [cast, setCase] = useState([]);
-  const { movieId } = useParams();
-  useEffect(() => {
-    const fetch = async () => {
-      const response = await fetchCast(movieId);
-      setCase(response);
-    };
-    fetch();
-  }, [movieId]);
-  return (
-    <section className={style.castSection} aria-labelledby="cast-heading">
-      <div className={style.castGrid}>
-        {cast.map((c) => (
-          <article key={c.id} className={style.card}>
-            <img
-              src={
-                c.profile_path
-                  ? `https://image.tmdb.org/t/p/w300${c.profile_path}`
-                  : "https://placehold.co/300x450?text=No+Image&font=roboto"
-              }
-              alt={`Portrait of ${c.original_name}`}
-              className={style.image}
-            />
-            <div className={style.info}>
-              <h3>{c.original_name}</h3>
-              <p>
-                <strong>Character:</strong>
-                <br /> {c.character}
-              </p>
-            </div>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-};
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { getMovieCast } from '../../services/tmdbApi.js';
+import styles from './MovieCast.module.css';
 
-export default MovieCast;
+export default function MovieCast() {
+  const { movieId } = useParams();
+  const [cast, setCast] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchCast = async () => {
+      setLoading(true);
+      try {
+        const data = await getMovieCast(movieId);
+        setCast(data);
+      } catch (err) {
+        setError('Failed to load cast');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCast();
+  }, [movieId]);
+
+  if (loading) return <p>Loading cast...</p>;
+  if (error) return <p>{error}</p>;
+  if (cast.length === 0) return <p>No cast info available.</p>;
+
+  return (
+    <ul className={styles.castList}>
+      {cast.map((actor) => (
+        <li key={actor.cast_id}>
+          <img
+            src={
+              actor.profile_path
+                ? `https://image.tmdb.org/t/p/w200${actor.profile_path}`
+                : 'https://via.placeholder.com/200x300'
+            }
+            alt={actor.name}
+          />
+          <p>{actor.name}</p>
+        </li>
+      ))}
+    </ul>
+  );
+}

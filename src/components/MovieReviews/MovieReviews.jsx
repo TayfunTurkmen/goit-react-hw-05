@@ -1,31 +1,41 @@
-import { useEffect, useState } from "react";
-import { fetchReviews } from "../../movie-api";
-import { useParams } from "react-router-dom";
-import style from "./MovieReviews.module.css";
-const MovieCast = () => {
-  const [content, setContent] = useState([]);
-  const { movieId } = useParams();
-  useEffect(() => {
-    const fetch = async () => {
-      const response = await fetchReviews(movieId);
-      setContent(response);
-    };
-    fetch();
-  }, [movieId]);
-  return content.length > 0 ? (
-    <section className={style.castSection} aria-labelledby="cast-heading">
-      <div className={style.castGrid}>
-        {content.map((c) => (
-          <article key={c.id} className={style.card}>
-            <h3>{c.author}</h3>
-            <p>{c.content}</p>
-          </article>
-        ))}
-      </div>
-    </section>
-  ) : (
-    <p>We don't have any reviews for this movie.</p>
-  );
-};
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { getMovieReviews } from '../../services/tmdbApi.js';
+import styles from './MovieReviews.module.css';
 
-export default MovieCast;
+export default function MovieReviews() {
+  const { movieId } = useParams();
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      setLoading(true);
+      try {
+        const data = await getMovieReviews(movieId);
+        setReviews(data);
+      } catch (err) {
+        setError('Failed to load reviews');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReviews();
+  }, [movieId]);
+
+  if (loading) return <p>Loading reviews...</p>;
+  if (error) return <p>{error}</p>;
+  if (reviews.length === 0) return <p>No reviews available.</p>;
+
+  return (
+    <ul className={styles.reviewList}>
+      {reviews.map((review) => (
+        <li key={review.id}>
+          <h4>{review.author}</h4>
+          <p>{review.content}</p>
+        </li>
+      ))}
+    </ul>
+  );
+}

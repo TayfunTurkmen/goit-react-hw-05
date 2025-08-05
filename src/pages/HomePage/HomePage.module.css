@@ -1,1 +1,10 @@
+.container {
+  padding-top: 100px;
+  padding-left: 20px; /* solda kalır */
+}
 
+h1 {
+  font-size: 24px;
+  margin-bottom: 15px;
+  color: #000;
+}

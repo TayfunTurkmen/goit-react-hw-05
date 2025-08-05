@@ -1,0 +1,24 @@
+.reviewsList {
+  padding: 20px;
+  list-style: none;
+  margin: 0;
+}
+
+.reviewsList li {
+  background-color: #fff;
+  margin-bottom: 15px;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.reviewsList h3 {
+  margin-top: 0;
+  font-size: 16px;
+  color: #e50914;
+}
+
+.reviewsList p {
+  font-size: 14px;
+  line-height: 1.4;
+}

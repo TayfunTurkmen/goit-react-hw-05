@@ -1,80 +1,69 @@
-import { useEffect, useState } from "react";
-import { fetchSelectedMovie } from "../../movie-api";
-import {
-  NavLink,
-  Outlet,
-  useLocation,
-  useNavigate,
-  useParams,
-} from "react-router-dom";
-import style from "./MovieDetailsPage.module.css";
-import { GoArrowLeft } from "react-icons/go";
+import React, { useEffect, useState, useRef } from 'react';
+import { useParams, NavLink, Outlet, useLocation, Link } from 'react-router-dom';
+import { getMovieDetails } from '../../services/tmdbApi.js';
+import styles from './MovieDetailsPage.module.css';
 
-const MovieDetailsPage = () => {
-  const [movie, setMovie] = useState({});
+export default function MovieDetailsPage() {
   const { movieId } = useParams();
-  const navigate = useNavigate();
+  const [movie, setMovie] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const location = useLocation();
+  const backLink = useRef(location.state?.from || '/movies');
 
   useEffect(() => {
-    const SelectedMovie = async () => {
-      const selectedMovie = await fetchSelectedMovie(movieId);
-      setMovie(selectedMovie);
+    const fetchMovie = async () => {
+      setLoading(true);
+      try {
+        const data = await getMovieDetails(movieId);
+        setMovie(data);
+      } catch (err) {
+        setError('Failed to load movie details');
+      } finally {
+        setLoading(false);
+      }
     };
-    SelectedMovie();
+    fetchMovie();
   }, [movieId]);
-  const genres = movie.genres?.map((genre) => genre.name) ?? [];
+
+  if (loading) return <p>Loading movie...</p>;
+  if (error) return <p>{error}</p>;
+  if (!movie) return null;
 
   return (
-    <>
-      <div className={style.container}>
-        <button
-          onClick={() => {
-            navigate(location.state?.from || "/");
-          }}
-        >
-          <GoArrowLeft className={style.icon} />
-          Go Back
-        </button>
-        <div className={style.info}>
+    <div className={styles.container}>
+      {/* Üst detay alanı sabit kalır */}
+      <div className={styles.topSection}>
+        <Link to={backLink.current} className={styles.goBack}>← Go back</Link>
+        <div className={styles.details}>
           <img
-            src={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`}
-            alt={movie.tagline}
-            className={style.image}
+            src={`https://image.tmdb.org/t/p/w300${movie.poster_path}`}
+            alt={movie.title}
+            className={styles.poster}
           />
-
-          <div>
-            <h2>
-              {movie.title} ({new Date(movie.release_date).getFullYear()})
-            </h2>
-            <p>{`User Score: %${Math.round(movie.vote_average * 10)}`}</p>
+          <div className={styles.info}>
+            <h2>{movie.title} ({new Date(movie.release_date).getFullYear()})</h2>
+            <p><strong>User Score:</strong> {Math.round(movie.vote_average * 10)}%</p>
             <h3>Overview</h3>
             <p>{movie.overview}</p>
-            <h4>Genres</h4>
-            <p>{genres.join(", ")}</p>
+            <h3>Genres</h3>
+            <p>{movie.genres.map(g => g.name).join(' ')}</p>
           </div>
         </div>
+        <hr />
+        <div className={styles.additional}>
+          <h3>Additional information</h3>
+          <ul>
+            <li><NavLink to="cast">Cast</NavLink></li>
+            <li><NavLink to="reviews">Reviews</NavLink></li>
+          </ul>
+        </div>
       </div>
-      <div className={style.infoBox}>
-        <p>Additional Informations</p>
-        <ul>
-          <li>
-            <NavLink className={style.links} to={"cast"}>
-              Cast
-            </NavLink>
-          </li>
-          <li>
-            <NavLink className={style.links} to={"reviews"}>
-              Reviews
-            </NavLink>
-          </li>
-        </ul>
-      </div>
-      <div>
+
+      {/* Cast ve Reviews burada üst kısmı aşağı itmeden açılır */}
+      <div className={styles.bottomSection}>
         <Outlet />
       </div>
-    </>
+    </div>
   );
-};
-
-export default MovieDetailsPage;
+}

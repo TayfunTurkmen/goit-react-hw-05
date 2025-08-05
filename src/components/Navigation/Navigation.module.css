@@ -1,12 +1,36 @@
-.headerNav {
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
-  padding: 20px;
-  margin-bottom: 10px;
+.header {
+  border-bottom: 1px solid #ccc;
+  padding: 1rem 2rem;
+  background-color: white;
+  position: fixed;        /* Sayfanın en üstüne sabitler */
+  top: 0;
+  left: 0;
+  width: 100%;            /* Border tam genişlikte */
+  z-index: 1000;
+  box-sizing: border-box;
 }
-.navLink {
-  margin-right: 10px;
-  color: black;
+
+.nav {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: flex-start;
 }
-.isActive {
-  color: crimson;
+
+.link {
+  text-decoration: none;
+  font-size: 20px;
+  color: #333;
+  font-weight: 500;
+  transition: color 0.3s ease;
 }
+
+.link:hover {
+  color: #d0021b;
+}
+
+.active {
+  color: #d0021b;
+  font-weight: bold;
+}
+
+

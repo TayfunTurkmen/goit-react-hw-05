@@ -1,52 +1,48 @@
-import style from "./MoviesPage.module.css";
-import { fetchSearchedMovie } from "../../movie-api";
-import { useEffect, useState } from "react";
-import MovieList from "../../components/MovieList/MovieList";
-import { useSearchParams } from "react-router-dom";
-const MoviesPage = () => {
-  const [query, setQuery] = useState("");
-  const [queryMovies, setQueryMovies] = useState([]);
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { searchMovies } from '../../services/tmdbApi.js';
+import MovieList from '../../components/MovieList/MovieList.jsx';
+import styles from './MoviesPage.module.css';
+
+export default function MoviesPage() {
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
-  const currentQuery = searchParams.get("query") ?? "";
+  const query = searchParams.get('query') || '';
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const value = e.target.elements.query.value.trim();
+    setSearchParams({ query: value });
+  };
 
   useEffect(() => {
-    if (!currentQuery) return;
+    if (!query) return;
     const fetchMovies = async () => {
+      setLoading(true);
       try {
-        const response = await fetchSearchedMovie(currentQuery);
-        setQueryMovies(response);
-      } catch (error) {
-        console.error("Search failed:", error);
+        const data = await searchMovies(query);
+        setMovies(data);
+      } catch (err) {
+        setError('Failed to search movies');
+      } finally {
+        setLoading(false);
       }
     };
     fetchMovies();
-  }, [currentQuery]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!query.trim()) return;
-    setSearchParams({ query });
-    setQuery("");
-  };
+  }, [query]);
 
   return (
-    <>
+    <div className={styles.container}>
+      <h1>Search Movies</h1>
       <form onSubmit={handleSubmit}>
-        <div className={style.movieDiv}>
-          <input
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-            }}
-            className={style.movieInput}
-            type="text"
-          />
-          <button type="submit">Search</button>
-        </div>
+        <input name="query" defaultValue={query} />
+        <button type="submit">Search</button>
       </form>
-      {queryMovies.length > 0 && <MovieList movies={queryMovies} />}
-    </>
+      {loading && <p>Loading...</p>}
+      {error && <p>{error}</p>}
+      {movies.length > 0 && <MovieList movies={movies} />}
+    </div>
   );
-};
-
-export default MoviesPage;
+}
